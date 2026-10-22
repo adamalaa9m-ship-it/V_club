@@ -1,0 +1,757 @@
+});
+            requestAnimationFrame(animateParticles);
+        }<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V_CLUB | Modern Luxury Streetwear & Apparel</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        vclub: {
+                            black: '#07080a',
+                            surface: '#0f1117',
+                            card: '#161922',
+                            accent: '#6366f1',
+                            purple: '#a855f7',
+                            pink: '#ec4899',
+                            glow: 'rgba(99, 102, 241, 0.25)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #07080a;
+            color: #f8fafc;
+            overflow-x: hidden;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Dynamic Theme Backgrounds */
+        body.theme-cyber {
+            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.22) 0%, rgba(168, 85, 247, 0.1) 45%, #07080a 80%);
+            background-attachment: fixed;
+        }
+
+        body.theme-oled {
+            background-color: #000000;
+            background-image: none;
+        }
+
+        body.theme-glass {
+            background: linear-gradient(135deg, #0b0f19 0%, #111827 50%, #07080a 100%);
+            background-attachment: fixed;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(18, 21, 31, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(22, 25, 34, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 12px 30px -10px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Canvas Particle Container */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.6;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #07080a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2432;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6366f1;
+        }
+    </style>
+</head>
+<body class="theme-cyber antialiased">
+
+    <!-- Particle Mesh Background Canvas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Main Ambient Glow -->
+    <div id="ambient-glow" class="fixed top-[-200px] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none z-0 transition-opacity duration-700"></div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-white/10 px-4 lg:px-8 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center font-display font-black text-xl text-white shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
+                    V
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display text-2xl font-black tracking-wider text-white flex items-center gap-1">
+                        V_CLUB<span class="text-indigo-500 text-xs py-0.5 px-1.5 rounded bg-indigo-500/10 border border-indigo-500/20 font-sans font-normal tracking-normal">STREETWEAR</span>
+                    </span>
+                </div>
+            </a>
+
+            <!-- Nav Links -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                <a href="#store" class="hover:text-white transition-colors">Store Drops</a>
+                <a href="#customizer" class="hover:text-white transition-colors">Theme Switcher</a>
+                <a href="#about" class="hover:text-white transition-colors">Brand Identity</a>
+            </nav>
+
+            <!-- Actions Bar -->
+            <div class="flex items-center gap-3">
+                <!-- Theme Customizer Modal Toggle -->
+                <button onclick="toggleModal('theme-modal')" class="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-indigo-500/50 text-slate-300 hover:text-white transition-all flex items-center gap-2 text-sm font-medium">
+                    <i class="fa-solid fa-palette text-indigo-400"></i>
+                    <span class="hidden sm:inline">Theme</span>
+                </button>
+
+                <!-- Add New Product Button -->
+                <button onclick="toggleModal('add-product-modal')" class="p-2.5 sm:px-4 sm:py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="hidden sm:inline">Add Drop</span>
+                </button>
+
+                <!-- Cart Button -->
+                <button onclick="toggleCart(true)" class="relative p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-indigo-500/50 text-slate-300 hover:text-white transition-all">
+                    <i class="fa-solid fa-bag-shopping text-lg"></i>
+                    <span id="cart-badge" class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-indigo-600 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-slate-900 hidden">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative z-10 pt-16 pb-12 px-4 max-w-7xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-6 tracking-wide">
+            <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+            SPRING / SUMMER 2026 COLLECTION AVAILABLE NOW
+        </div>
+        
+        <h1 class="font-display text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white max-w-4xl mx-auto leading-tight mb-6">
+            ELEVATED STREETWEAR <br>
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500">WITHOUT COMPROMISE</span>
+        </h1>
+        
+        <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto mb-8 font-light">
+            Luxury oversized t-shirts, heavyweight cotton blanks, and futuristic cyberpunk graphic apparel crafted for the modern aesthetic.
+        </p>
+
+        <!-- Search & Quick Filter Bar -->
+        <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-3 glass-panel p-2 rounded-2xl shadow-2xl">
+            <div class="relative w-full">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="search-input" oninput="renderProducts()" placeholder="Search T-shirts, hoodies, or tags..." class="w-full bg-transparent pl-11 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none">
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto px-2 sm:px-0">
+                <select id="category-filter" onchange="renderProducts()" class="w-full sm:w-auto bg-slate-800/80 text-xs text-slate-200 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                    <option value="all">All Categories</option>
+                    <option value="Oversized">Oversized Tees</option>
+                    <option value="Graphic">Graphic Tees</option>
+                    <option value="Minimalist">Minimalist</option>
+                    <option value="Limited">Limited Edition</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Store Section -->
+    <main id="store" class="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 py-8">
+        
+        <!-- Category Chips -->
+        <div class="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                <button onclick="setCategoryTag('all')" class="category-chip active font-medium text-xs px-4 py-2 rounded-xl bg-indigo-600 text-white transition-all">All Apparel</button>
+                <button onclick="setCategoryTag('Oversized')" class="category-chip font-medium text-xs px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition-all">Oversized Fit</button>
+                <button onclick="setCategoryTag('Graphic')" class="category-chip font-medium text-xs px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition-all">Graphic Tees</button>
+                <button onclick="setCategoryTag('Minimalist')" class="category-chip font-medium text-xs px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition-all">Minimal Essentials</button>
+            </div>
+            <span id="product-count" class="text-xs text-slate-400 hidden sm:block">Showing 0 Items</span>
+        </div>
+
+        <!-- Products Grid -->
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Dynamic Cards Loaded via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-20 glass-panel rounded-3xl border border-white/10 my-8">
+            <div class="w-16 h-16 rounded-full bg-indigo-500/10 text-indigo-400 flex items-center justify-center mx-auto mb-4 text-2xl">
+                <i class="fa-solid fa-shirt"></i>
+            </div>
+            <h3 class="font-display text-xl font-bold text-white mb-2">No Items Found</h3>
+            <p class="text-slate-400 text-sm max-w-md mx-auto mb-6">No streetwear drops match your search criteria or store is empty.</p>
+            <button onclick="toggleModal('add-product-modal')" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition-all">
+                + Add Custom V_CLUB Drop
+            </button>
+        </div>
+    </main>
+
+    <!-- Theme Customization Section -->
+    <section id="customizer" class="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 py-16">
+        <div class="glass-panel p-8 sm:p-12 rounded-3xl relative overflow-hidden">
+            <div class="max-w-xl">
+                <span class="text-indigo-400 text-xs font-bold tracking-widest uppercase mb-2 block">Atmosphere & Visuals</span>
+                <h2 class="font-display text-3xl font-bold text-white mb-4">Customize Store Aesthetics</h2>
+                <p class="text-slate-400 text-sm mb-8 leading-relaxed">
+                    Personalize your shopping workspace. Select from glowing dark gradients, deep OLED contrast, or interactive particle meshes.
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <button onclick="applyTheme('cyber')" class="p-4 rounded-2xl bg-slate-900 border border-indigo-500/50 hover:border-indigo-500 text-left transition-all group">
+                        <div class="w-full h-8 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 mb-3"></div>
+                        <span class="text-xs font-bold text-white block group-hover:text-indigo-400">Cyber Glow</span>
+                    </button>
+
+                    <button onclick="applyTheme('mesh')" class="p-4 rounded-2xl bg-slate-900 border border-white/10 hover:border-purple-500 text-left transition-all group">
+                        <div class="w-full h-8 rounded-lg bg-gradient-to-r from-purple-900 via-indigo-950 to-slate-900 mb-3 flex items-center justify-center">
+                            <i class="fa-solid fa-circle-nodes text-xs text-purple-400"></i>
+                        </div>
+                        <span class="text-xs font-bold text-white block group-hover:text-purple-400">Star Mesh</span>
+                    </button>
+
+                    <button onclick="applyTheme('oled')" class="p-4 rounded-2xl bg-black border border-white/10 hover:border-white text-left transition-all group">
+                        <div class="w-full h-8 rounded-lg bg-black border border-white/20 mb-3"></div>
+                        <span class="text-xs font-bold text-white block">Deep OLED</span>
+                    </button>
+
+                    <button onclick="applyTheme('glass')" class="p-4 rounded-2xl bg-slate-800/80 border border-white/10 hover:border-indigo-400 text-left transition-all group">
+                        <div class="w-full h-8 rounded-lg bg-slate-800 border border-white/10 backdrop-blur-md mb-3"></div>
+                        <span class="text-xs font-bold text-white block">Studio Glass</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-white/10 py-12 px-4 glass-panel mt-16">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-display font-black text-white text-sm">V</div>
+                <span class="font-display font-bold text-white tracking-wider text-lg">V_CLUB</span>
+            </div>
+            <p class="text-xs text-slate-500">© 2026 V_CLUB Apparel Inc. All rights reserved. Designed for Streetwear Couture.</p>
+            <div class="flex items-center gap-4 text-slate-400 text-lg">
+                <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="#" class="hover:text-white transition-colors"><i class="fa-brands fa-tiktok"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Slide-over Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed inset-0 z-50 overflow-hidden pointer-events-none transition-all duration-300">
+        <div id="cart-backdrop" onclick="toggleCart(false)" class="absolute inset-0 bg-black/70 backdrop-blur-sm opacity-0 transition-opacity duration-300 pointer-events-auto"></div>
+        
+        <div id="cart-panel" class="fixed inset-y-0 right-0 max-w-full flex pl-10 transform translate-x-full transition-transform duration-300 ease-in-out pointer-events-auto">
+            <div class="w-screen max-w-md glass-panel bg-slate-950/95 border-l border-white/10 flex flex-col">
+                
+                <!-- Cart Header -->
+                <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-bag-shopping text-indigo-400 text-xl"></i>
+                        <h2 class="font-display text-xl font-bold text-white">Your Cart</h2>
+                    </div>
+                    <button onclick="toggleCart(false)" class="p-2 text-slate-400 hover:text-white transition-colors">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Cart Items List -->
+                <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4">
+                    <!-- Dynamic Cart Rows -->
+                </div>
+
+                <!-- Cart Summary & Checkout -->
+                <div class="p-6 border-t border-white/10 bg-slate-900/60 space-y-4">
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between text-slate-400">
+                            <span>Subtotal</span>
+                            <span id="cart-subtotal" class="text-white font-medium">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-slate-400">
+                            <span>Standard Shipping</span>
+                            <span class="text-emerald-400 font-medium">FREE</span>
+                        </div>
+                        <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
+                            <span>Total</span>
+                            <span id="cart-total" class="text-indigo-400">$0.00</span>
+                        </div>
+                    </div>
+
+                    <button onclick="checkout()" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 hover:opacity-90 text-white font-bold text-sm tracking-wide shadow-lg shadow-indigo-500/25 transition-all">
+                        PROCEED TO CHECKOUT
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add New Drop -->
+    <div id="add-product-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-panel bg-slate-900 border border-white/10 p-6 sm:p-8 rounded-3xl w-full max-w-lg relative animate-fade-in">
+            <button onclick="toggleModal('add-product-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <h3 class="font-display text-2xl font-bold text-white mb-1">Create New V_CLUB Drop</h3>
+            <p class="text-slate-400 text-xs mb-6">Add a custom streetwear item to your local store catalog.</p>
+
+            <form id="add-product-form" onsubmit="handleAddProduct(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Item Title</label>
+                    <input type="text" id="new-title" required placeholder="e.g. V_CLUB Acid Wash Cyber Tee" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Price ($ USD)</label>
+                        <input type="number" step="0.01" id="new-price" required placeholder="39.99" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Category</label>
+                        <select id="new-category" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                            <option value="Oversized">Oversized Tee</option>
+                            <option value="Graphic">Graphic Tee</option>
+                            <option value="Minimalist">Minimalist</option>
+                            <option value="Limited">Limited Edition</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Image URL</label>
+                    <input type="url" id="new-img" required placeholder="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="pt-4 flex gap-3">
+                    <button type="submit" class="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all">
+                        Save Drop
+                    </button>
+                    <button type="button" onclick="toggleModal('add-product-modal')" class="px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm font-semibold hover:bg-white/10">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Theme Selector -->
+    <div id="theme-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-panel bg-slate-900 border border-white/10 p-6 sm:p-8 rounded-3xl w-full max-w-md relative">
+            <button onclick="toggleModal('theme-modal')" class="absolute top-6 right-6 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <h3 class="font-display text-xl font-bold text-white mb-2">Select Theme Mode</h3>
+            <p class="text-slate-400 text-xs mb-6">Choose an atmosphere styling for V_CLUB.</p>
+
+            <div class="space-y-3">
+                <button onclick="applyTheme('cyber'); toggleModal('theme-modal')" class="w-full p-4 rounded-2xl bg-slate-950 border border-white/10 hover:border-indigo-500 flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-4 rounded-full bg-indigo-500"></div>
+                        <span class="text-sm font-medium text-white">Cyberpunk Glow</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+                </button>
+
+                <button onclick="applyTheme('mesh'); toggleModal('theme-modal')" class="w-full p-4 rounded-2xl bg-slate-950 border border-white/10 hover:border-purple-500 flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-4 rounded-full bg-purple-500"></div>
+                        <span class="text-sm font-medium text-white">Starry Mesh Animation</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+                </button>
+
+                <button onclick="applyTheme('oled'); toggleModal('theme-modal')" class="w-full p-4 rounded-2xl bg-slate-950 border border-white/10 hover:border-white flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-4 rounded-full bg-black border border-white"></div>
+                        <span class="text-sm font-medium text-white">Deep OLED Black</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-xs text-slate-500"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Initial Default Streetwear Products
+        const DEFAULT_PRODUCTS = [
+            {
+                id: 'p1',
+                title: "V_CLUB Neon Cyber Tee",
+                price: 44.99,
+                category: "Oversized",
+                img: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600",
+                sizes: ["S", "M", "L", "XL", "XXL"],
+                colors: ["#000000", "#6366f1", "#ffffff"]
+            },
+            {
+                id: 'p2',
+                title: "Acid Wash Heavyweight Hoodie",
+                price: 79.99,
+                category: "Graphic",
+                img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600",
+                sizes: ["M", "L", "XL"],
+                colors: ["#1e293b", "#000000"]
+            },
+            {
+                id: 'p3',
+                title: "Minimalist Boxy Drop Tee",
+                price: 34.99,
+                category: "Minimalist",
+                img: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600",
+                sizes: ["S", "M", "L", "XL"],
+                colors: ["#ffffff", "#000000", "#94a3b8"]
+            },
+            {
+                id: 'p4',
+                title: "Cyberpunk Tokyo Skyline Drop",
+                price: 49.99,
+                category: "Limited",
+                img: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=600",
+                sizes: ["S", "M", "L", "XL", "XXL"],
+                colors: ["#000000", "#a855f7"]
+            }
+        ];
+
+        // State Management
+        let products = JSON.parse(localStorage.getItem('vclub_items')) || DEFAULT_PRODUCTS;
+        let cart = JSON.parse(localStorage.getItem('vclub_cart')) || [];
+        let activeTag = 'all';
+
+        // Render Product Cards
+        function renderProducts() {
+            const grid = document.getElementById('product-grid');
+            const emptyState = document.getElementById('empty-state');
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            const categoryVal = document.getElementById('category-filter').value;
+
+            const filtered = products.filter(p => {
+                const matchesSearch = p.title.toLowerCase().includes(searchVal) || p.category.toLowerCase().includes(searchVal);
+                const matchesCategory = (categoryVal === 'all' && (activeTag === 'all' || p.category === activeTag)) || p.category === categoryVal;
+                return matchesSearch && matchesCategory;
+            });
+
+            document.getElementById('product-count').innerText = `Showing ${filtered.length} Items`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.innerHTML = filtered.map(p => `
+                <div class="glass-card rounded-2xl overflow-hidden flex flex-col group relative">
+                    <!-- Image Wrapper -->
+                    <div class="relative h-72 overflow-hidden bg-slate-900">
+                        <img src="${p.img}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <span class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-xs font-semibold px-2.5 py-1 rounded-lg border border-white/10 text-slate-300">
+                            ${p.category}
+                        </span>
+                        <button onclick="deleteProduct('${p.id}')" class="absolute top-3 right-3 w-8 h-8 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                            <h3 class="font-display font-bold text-white text-base leading-snug mb-1">${p.title}</h3>
+                            <div class="text-indigo-400 font-bold text-lg">$${parseFloat(p.price).toFixed(2)}</div>
+                        </div>
+
+                        <!-- Options Selectors -->
+                        <div class="space-y-3 pt-2 border-t border-white/5">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Size</label>
+                                <div class="flex gap-1.5" id="sizes-${p.id}">
+                                    ${p.sizes.map((s, idx) => `
+                                        <button onclick="selectSize('${p.id}', '${s}')" class="size-btn-${p.id} text-xs font-semibold w-7 h-7 rounded-lg border border-white/10 ${idx === 1 ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-900 text-slate-400 hover:text-white'} transition-all">
+                                            ${s}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <button onclick="addToCart('${p.id}')" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-indigo-600 border border-white/10 hover:border-indigo-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-cart-plus"></i> Add To Bag
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Selected Options Tracking
+        const selectedOptions = {};
+
+        function selectSize(productId, size) {
+            selectedOptions[productId] = { size };
+            const btns = document.querySelectorAll(`.size-btn-${productId}`);
+            btns.forEach(b => {
+                if (b.innerText.trim() === size) {
+                    b.className = `size-btn-${productId} text-xs font-semibold w-7 h-7 rounded-lg bg-indigo-600 border border-indigo-500 text-white transition-all`;
+                } else {
+                    b.className = `size-btn-${productId} text-xs font-semibold w-7 h-7 rounded-lg border border-white/10 bg-slate-900 text-slate-400 hover:text-white transition-all`;
+                }
+            });
+        }
+
+        // Cart Logic
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const chosenSize = selectedOptions[productId]?.size || product.sizes[0] || 'M';
+
+            const existingIndex = cart.findIndex(item => item.id === productId && item.size === chosenSize);
+            if (existingIndex > -1) {
+                cart[existingIndex].qty += 1;
+            } else {
+                cart.push({ ...product, size: chosenSize, qty: 1 });
+            }
+
+            saveCart();
+            toggleCart(true);
+        }
+
+        function updateCartQty(index, change) {
+            cart[index].qty += change;
+            if (cart[index].qty <= 0) cart.splice(index, 1);
+            saveCart();
+        }
+
+        function saveCart() {
+            localStorage.setItem('vclub_cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        function renderCart() {
+            const itemsContainer = document.getElementById('cart-items');
+            const badge = document.getElementById('cart-badge');
+            
+            const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
+            if (totalItems > 0) {
+                badge.innerText = totalItems;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            if (cart.length === 0) {
+                itemsContainer.innerHTML = `
+                    <div class="text-center py-12 text-slate-500">
+                        <i class="fa-solid fa-bag-shopping text-4xl mb-3 opacity-30"></i>
+                        <p class="text-sm">Your shopping bag is empty.</p>
+                    </div>
+                `;
+            } else {
+                itemsContainer.innerHTML = cart.map((item, idx) => `
+                    <div class="flex items-center gap-4 p-3 rounded-2xl bg-white/5 border border-white/5">
+                        <img src="${item.img}" class="w-16 h-16 rounded-xl object-cover bg-slate-900">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-bold text-white truncate">${item.title}</h4>
+                            <div class="text-xs text-slate-400">Size: <span class="text-indigo-400 font-semibold">${item.size}</span></div>
+                            <div class="text-xs font-bold text-white mt-1">$${(item.price * item.qty).toFixed(2)}</div>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-900 border border-white/10 rounded-lg p-1">
+                            <button onclick="updateCartQty(${idx}, -1)" class="w-5 h-5 text-slate-400 hover:text-white flex items-center justify-center text-xs">-</button>
+                            <span class="text-xs font-bold text-white w-4 text-center">${item.qty}</span>
+                            <button onclick="updateCartQty(${idx}, 1)" class="w-5 h-5 text-slate-400 hover:text-white flex items-center justify-center text-xs">+</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+            document.getElementById('cart-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+            document.getElementById('cart-total').innerText = `$${subtotal.toFixed(2)}`;
+        }
+
+        function toggleCart(show) {
+            const backdrop = document.getElementById('cart-backdrop');
+            const panel = document.getElementById('cart-panel');
+            
+            if (show) {
+                backdrop.classList.remove('opacity-0', 'pointer-events-none');
+                panel.classList.remove('translate-x-full');
+            } else {
+                backdrop.classList.add('opacity-0', 'pointer-events-none');
+                panel.classList.add('translate-x-full');
+            }
+        }
+
+        // Add Product Form Handler
+        function handleAddProduct(e) {
+            e.preventDefault();
+            const title = document.getElementById('new-title').value;
+            const price = parseFloat(document.getElementById('new-price').value);
+            const category = document.getElementById('new-category').value;
+            const img = document.getElementById('new-img').value;
+
+            const newProduct = {
+                id: 'p_' + Date.now(),
+                title,
+                price,
+                category,
+                img,
+                sizes: ["S", "M", "L", "XL", "XXL"],
+                colors: ["#000000", "#6366f1"]
+            };
+
+            products.unshift(newProduct);
+            localStorage.setItem('vclub_items', JSON.stringify(products));
+            renderProducts();
+            toggleModal('add-product-modal');
+            e.target.reset();
+        }
+
+        function deleteProduct(id) {
+            if(confirm("Remove this drop from V_CLUB store?")) {
+                products = products.filter(p => p.id !== id);
+                localStorage.setItem('vclub_items', JSON.stringify(products));
+                renderProducts();
+            }
+        }
+
+        // Filter Chips
+        function setCategoryTag(cat) {
+            activeTag = cat;
+            document.querySelectorAll('.category-chip').forEach(btn => {
+                if(btn.innerText.toLowerCase().includes(cat.toLowerCase()) || (cat === 'all' && btn.innerText.includes('All'))) {
+                    btn.className = 'category-chip active font-medium text-xs px-4 py-2 rounded-xl bg-indigo-600 text-white transition-all';
+                } else {
+                    btn.className = 'category-chip font-medium text-xs px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition-all';
+                }
+            });
+            renderProducts();
+        }
+
+        // Modal Toggles
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.toggle('hidden');
+        }
+
+        // Theme Switcher Logic
+        function applyTheme(theme) {
+            document.body.className = '';
+            document.body.classList.add(`theme-${theme}`);
+            const canvas = document.getElementById('particles-canvas');
+            const ambient = document.getElementById('ambient-glow');
+
+            if (theme === 'mesh') {
+                canvas.style.display = 'block';
+                ambient.style.opacity = '0.2';
+            } else {
+                canvas.style.display = 'none';
+                ambient.style.opacity = '1';
+            }
+        }
+
+        function checkout() {
+            if (cart.length === 0) return alert("Your cart is empty!");
+            alert("Thank you for your V_CLUB Order! Checkout completed.");
+            cart = [];
+            saveCart();
+            toggleCart(false);
+        }
+
+        // Starry Particle Canvas Animation
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(99, 102, 241, 0.4)';
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 40; i++) particles.push(new Particle());
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+        animateParticles();
+
+        // Initial Load
+        renderProducts();
+        renderCart();
+    </script>
+</body>
+</html>
